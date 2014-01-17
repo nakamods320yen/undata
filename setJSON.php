@@ -5,6 +5,7 @@ and mart = "CLINO"
 and filter = "ElementCode:95"
 order by year, row_order, column_order*/
 
+require '../test/s3.php';
 require_once 'm.php';
 
 $c = new setJSON();
@@ -19,7 +20,7 @@ class setJSON {
 	}
 	function getDatasetList() {
 		$sql = "SELECT * FROM  `datasets` WHERE 1 "
-			." and json_time <  '2013-10-29 10:00:00' "
+			." and json_time <  '2014-01-15 10:00:00' " // not include ComTrade/_l1Code:20
 			." ORDER BY  `datasets`.`update_time` ASC ";
 		$res = $this->m->execSQL($sql);
 		while($row = mysqli_fetch_array($res)) {
@@ -76,16 +77,13 @@ class setJSON {
 			"data" => $arr_json
 		);
 
-		$mongo = new Mongo();
+		upload2s3gz($mart."/".$filter, json_encode($json_object));
+		//for mongo
+		/*$mongo = new Mongo();
 		
 		$db = $mongo->selectDB("undata");
 		$col = $db->selectCollection("test");
 
-
-		/*$cursor = $col->find(array("martfilter" => $martfilter));
-		foreach($cursor as $_id => $doc) {
-			$col->remove(array('_id' => new MongoId($_id)), array("justOne" => true));
-		}*/
 		$col->remove(array("martfilter" => $martfilter));
 
 		try {
@@ -97,7 +95,7 @@ class setJSON {
 			"message" => $e->getMessage(),
 			"data" => array()
 			));
-		}
+		}*/
 
 		$this->updateJSONTime($mart, $filter);
 

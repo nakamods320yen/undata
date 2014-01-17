@@ -8,6 +8,10 @@ error_reporting(E_ALL);
 //require_once 'm.php';
 
 mb_internal_encoding("UTF-8");
+
+require '../../test/s3.php';
+
+
 $d = new Data();
 $d->readCSV('WEOOct2013all.csv');
 
@@ -129,7 +133,7 @@ class Data {
 					$tmp = array();
 				}
 				if($i >= $this->code_year_index && $i < $this->code_year_end) {
-					$tmp['value'] = $arr[$i] + 0;
+					$tmp['value'] = str_replace(",", "", $arr[$i]) + 0;
 					//var_dump($tmp);
 					/*var_dump($this->data["data"]);
 					var_dump($i-$this->code_year_index);
@@ -147,17 +151,20 @@ class Data {
 		$this->last_code = $this->crnt_code; //last of 1 tate
 	}
 	function addMongo() {
-		$mongo = new Mongo();
+		/*$mongo = new Mongo();
 		
 		$db = $mongo->selectDB("undata");
-		$col = $db->selectCollection("imf");
+		$col = $db->selectCollection("imf");*/
 
 
 		for($i=0,$l=count($this->data);$i<$l;$i++) {
 			$data = $this->data[$i];
-			$col->remove(array("martfilter" => $data["code"]));
+			
+			//$col->remove(array("martfilter" => $data["code"]));
 
-			try {
+
+			upload2s3gz("imf/".$data["code"], json_encode($data));
+			/*try {
 				$col->insert($data);
 			} catch(Exception $e) {
 				$col->insert(array(
@@ -166,7 +173,7 @@ class Data {
 				"message" => $e->getMessage(),
 				"data" => array()
 				));
-			}
+			}*/
 
 		}
 	}
